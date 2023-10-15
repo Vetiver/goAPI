@@ -5,25 +5,24 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func dbConf() {
-	urlExample := "postgres://postgres:228@localHost:5432/postgres"
-	conn, err := pgx.Connect(context.Background(), urlExample)
+func DbStart() {
+	urlExample := "postgres://postgres:228@localHost:5432/nest_project"
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv(urlExample))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
+	defer dbpool.Close()
 
-	var name string
-	var weight int64
-	err = conn.QueryRow(context.Background(), "select name, weight from widgets where id=$1", 42).Scan(&name, &weight)
+	var greeting string
+	err = dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println(name, weight)
+	fmt.Println(greeting)
 }
