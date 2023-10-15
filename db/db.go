@@ -9,8 +9,8 @@ import (
 )
 
 func DbStart() {
-	urlExample := "postgres://postgres:228@localHost:5432/nest_project"
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv(urlExample))
+	urlExample := "postgres://postgres:228@localHost:5432/postgres"
+	dbpool, err := pgxpool.New(context.Background(), urlExample)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
 		os.Exit(1)
