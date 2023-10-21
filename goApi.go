@@ -1,11 +1,8 @@
-
 package main
 
 import "github.com/gin-gonic/gin"
 
 import "goApi/handlers"
-
-
 
 func main() {
 	r := gin.Default()
