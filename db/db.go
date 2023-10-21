@@ -3,13 +3,13 @@ package db
 import (
 	"context"
 	"fmt"
-	"os"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"os"
 )
 
 type Record struct {
-	Id    int    `json:"id"`
-  }
+	Id int `json:"id"`
+}
 
 func DbStart() *pgxpool.Pool {
 	urlExample := "postgres://postgres:228@localhost:5432/postgres"
@@ -24,16 +24,16 @@ func DbStart() *pgxpool.Pool {
 
 func Insert() string {
 	pool := DbStart()
-  
+
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-	  return ""
+		return ""
 	}
-  
+
 	row := conn.QueryRow(context.Background(),
-	  "INSERT INTO test(name) VALUES ($1) RETURNING id;", "rrrr" ) 
+		"INSERT INTO test(name) VALUES ($1) RETURNING id;", "rrrr")
 	//после коннекта прописываем запрос на Insert и возвращаем значение id
 	var id uint64
 	//интициализируем переменную id
@@ -41,8 +41,8 @@ func Insert() string {
 	//сканируем значение id
 	if err != nil {
 		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
-//если ты тупой, то тебе вернет ошибку пупсик
-	  return ""
+		//если ты тупой, то тебе вернет ошибку пупсик
+		return ""
 	}
 	return "что-то"
-  }
+}
