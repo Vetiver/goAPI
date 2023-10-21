@@ -15,10 +15,9 @@ func DbStart() *pgxpool.Pool {
 	urlExample := "postgres://postgres:228@localhost:5432/postgres"
 	dbpool, err := pgxpool.New(context.Background(), urlExample)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v", err)
 		os.Exit(1)
 	}
-	defer dbpool.Close()
 
 	return dbpool
 }
@@ -29,17 +28,20 @@ func Insert() string {
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		fmt.Errorf("Unable to acquire a database connection: %v\n", err)
+		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
 	  return ""
 	}
   
 	row := conn.QueryRow(context.Background(),
-	  "INSERT INTO test(name) VALUES ($1);", "gay")
+	  "INSERT INTO test(name) VALUES ($1) RETURNING id;", "rrrr" ) 
+	//после коннекта прописываем запрос на Insert и возвращаем значение id
 	var id uint64
+	//интициализируем переменную id
 	err = row.Scan(&id)
+	//сканируем значение id
 	if err != nil {
-		fmt.Errorf("Unable to INSERT: %v\n", err)
-
+		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
+//если ты тупой, то тебе вернет ошибку пупсик
 	  return ""
 	}
 	return "что-то"
