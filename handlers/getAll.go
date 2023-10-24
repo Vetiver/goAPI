@@ -5,6 +5,6 @@ import (
 	"goApi/db"
 )
 
-func Del(c *gin.Context) {
-	c.JSON(200, db.DeliteById())
+func GetAll(c *gin.Context) {
+	c.JSON(200, db.GetAllNames())
 }

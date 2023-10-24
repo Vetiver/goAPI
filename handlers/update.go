@@ -5,6 +5,6 @@ import (
 	"goApi/db"
 )
 
-func Vi(c *gin.Context) {
-	c.JSON(200, db.GetAllNames())
+func UpdateNameById(c *gin.Context) {
+	c.JSON(200, db.UpdateName())
 }

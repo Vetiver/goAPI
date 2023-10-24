@@ -9,8 +9,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Record struct {
-	Id int `json:"id"`
+type Data struct {
+	id   int    `json:"id"`
+	name string `json:"name"`
 }
 
 func DbStart() *pgxpool.Pool {
@@ -49,7 +50,6 @@ func Insert() string {
 	return "успешное добавление"
 }
 
-
 func DeliteById() string {
 	pool := DbStart()
 
@@ -63,20 +63,43 @@ func DeliteById() string {
 	row := conn.QueryRow(context.Background(),
 		"DELETE FROM test WHERE id=$1 RETURNING id;", 1)
 	//после коннекта прописываем запрос на DELETE и возвращаем id
-	var id uint64
-	//интициализируем переменную id
-	err = row.Scan(&id)
+	row.Scan()
 	//сканируем значение id
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
+		fmt.Println(fmt.Errorf("unable to DELITE: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
 		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
 	}
 	return "успешное удаление"
 }
 
-
 func GetAllNames() any {
+	pool := DbStart()
+	conn, err := pool.Acquire(context.Background())
+	//Acqure - забирает одно соединение с бд из pool
+	if err != nil {
+		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
+		return "ошибка соединения"
+	}
+
+	row := conn.QueryRow(context.Background(),
+		"SELECT * FROM test")
+	var data = []any
+	var d Data
+	//после коннекта прописываем запрос на получение инфы о всех таблицах
+	err = row.Scan(&d.id, &d.name)
+	data = append(data, d)
+	jsonData, err := json.Marshal(data)
+	//сканируем значение id
+	if err != nil {
+		fmt.Println(fmt.Errorf("unable to UPDATE: %v", err))
+		//если ты тупой, то тебе вернет ошибку пупсик
+		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
+	}
+	return jsonData
+}
+
+func UpdateName() string {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
@@ -87,15 +110,15 @@ func GetAllNames() any {
 	}
 
 	row := conn.QueryRow(context.Background(),
-		"SELECT * FROM test")
-	//после коннекта прописываем запрос на получение инфы о всех таблицах
-	err = row.Scan(&row)
-	users, err := json.Marshal(err)
+		"UPDATE test SET name = $1 WHERE id = $2", "gay", 1)
+	//после коннекта прописываем запрос на DELETE и возвращаем id
+	//интициализируем переменную id
+	row.Scan()
 	//сканируем значение id
 	if err != nil {
 		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
 		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
 	}
-	return users
+	return "успешный апдейт"
 }

@@ -5,6 +5,6 @@ import (
 	"goApi/db"
 )
 
-func Any(c *gin.Context) {
+func InsertName(c *gin.Context) {
 	c.JSON(200, db.Insert())
 }
