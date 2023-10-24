@@ -10,8 +10,8 @@ import (
 )
 
 type Data struct {
-	id   int    `json:"id"`
-	name string `json:"name"`
+    id   int
+    name string
 }
 
 func DbStart() *pgxpool.Pool {
@@ -84,10 +84,10 @@ func GetAllNames() any {
 
 	row := conn.QueryRow(context.Background(),
 		"SELECT * FROM test")
-	var data = []any
 	var d Data
 	//после коннекта прописываем запрос на получение инфы о всех таблицах
 	err = row.Scan(&d.id, &d.name)
+	var data = []Data{}
 	data = append(data, d)
 	jsonData, err := json.Marshal(data)
 	//сканируем значение id
