@@ -1,10 +1,17 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"goApi/db"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetAll(c *gin.Context) {
-	c.JSON(200, db.GetAllNames())
+	dbArr, err := db.GetAllNames()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+	}
+	c.JSON(200, dbArr)
 }
