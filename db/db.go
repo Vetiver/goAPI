@@ -87,7 +87,6 @@ func GetAllNames() ([]Data, error) {
 	 return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}
 	defer rows.Close()
-   
 	var data []Data
 	for rows.Next() {
 	 var d Data
@@ -96,6 +95,7 @@ func GetAllNames() ([]Data, error) {
 	  return nil, fmt.Errorf("unable to scan row: %v", err)
 	 }
 	 data = append(data, d)
+	 fmt.Println(fmt.Errorf("тут: %+v", data))
 	}
    
    
