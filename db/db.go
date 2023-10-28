@@ -9,8 +9,8 @@ import (
 )
 
 type Data struct {
-	name string
-    id   int
+	Name string `json:"name"`
+    Id   int `json:"id"`
 }
 
 
@@ -90,7 +90,7 @@ func GetAllNames() ([]Data, error) {
 	var data []Data
 	for rows.Next() {
 	 var d Data
-	 err = rows.Scan(&d.id, &d.name)
+	 err = rows.Scan(&d.Id, &d.Name)
 	 if err != nil {
 	  return nil, fmt.Errorf("unable to scan row: %v", err)
 	 }

@@ -7,14 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ArrStruct struct {
+type Data struct {
 	Name string `json:"name"`
 	Id   int    `json:"id"`
 }
 
 type UserGet struct {
-	Parce []ArrStruct `json:"parce"`
-}
+	Parce []db.Data `json:"parce"`
+ }
 
 func GetAll(c *gin.Context) {
 	dbArr, err := db.GetAllNames()
