@@ -90,7 +90,7 @@ func GetAllNames() ([]Data, error) {
 	return data, nil
 }
 
-func UpdateName(name, id  Data) string {
+func UpdateName(name Data) any {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
@@ -101,7 +101,7 @@ func UpdateName(name, id  Data) string {
 	}
 
 	row := conn.QueryRow(context.Background(),
-		"UPDATE test SET name = ? WHERE id = ?", name, id)
+		"UPDATE test SET name = $1  WHERE id = $2 ", name.Name, name.Id)
 	//после коннекта прописываем запрос на DELETE и возвращаем id
 	//интициализируем переменную id
 	row.Scan()
