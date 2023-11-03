@@ -10,10 +10,8 @@ import (
 
 type Data struct {
 	Name string `json:"name"`
-    Id   int `json:"id"`
+	Id   int    `json:"id"`
 }
-
-
 
 func DbStart() *pgxpool.Pool {
 	urlExample := "postgres://postgres:228@localhost:5432/postgres"
@@ -26,29 +24,21 @@ func DbStart() *pgxpool.Pool {
 	return dbpool
 }
 
-func Insert(name string) string {
-	pool := DbStart()
+func Insert(name Data) (Data, error) {
+    pool := DbStart()
 
-	conn, err := pool.Acquire(context.Background())
-	//Acqure - забирает одно соединение с бд из pool
-	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "не коннектится пупсик"
-	}
+    conn, err := pool.Acquire(context.Background())
+    if err != nil {
+        return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
+    }
 
-	row := conn.QueryRow(context.Background(),
-		"INSERT INTO test(name) VALUES ($1) RETURNING id;", name)
-	//после коннекта прописываем запрос на Insert и возвращаем значение id
-	var id uint64
-	//интициализируем переменную id
-	err = row.Scan(&id)
-	//сканируем значение id
-	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
-		//если ты тупой, то тебе вернет ошибку пупсик
-		return "тупорылая ты ослица, что ты пытался сделать?"
-	}
-	return "успешное добавление"
+    err = conn.QueryRow(context.Background(),
+        "INSERT INTO test(name) VALUES ($1) RETURNING id", name.Name).Scan(&name.Id)
+    if err != nil {
+        return Data{}, fmt.Errorf("unable to INSERT: %v", err)
+    }
+
+    return name, nil
 }
 
 func DeliteById(id int) string {
@@ -60,7 +50,7 @@ func DeliteById(id int) string {
 		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
 		return "ошибка соединения"
 	}
-
+	defer pool.Close()
 	row := conn.QueryRow(context.Background(),
 		"DELETE FROM test WHERE id=$1 RETURNING id;", id)
 	//после коннекта прописываем запрос на DELETE и возвращаем id
@@ -78,29 +68,27 @@ func GetAllNames() ([]Data, error) {
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-	 return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
-   
+	defer pool.Close()
 	rows, err := conn.Query(context.Background(),
-	 "SELECT id, name FROM test")
+		"SELECT id, name FROM test")
 	if err != nil {
-	 return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
+		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}
 	defer rows.Close()
 	var data []Data
 	for rows.Next() {
-	 var d Data
-	 err = rows.Scan(&d.Id, &d.Name)
-	 if err != nil {
-	  return nil, fmt.Errorf("unable to scan row: %v", err)
-	 }
-	 data = append(data, d)
-	 fmt.Println(fmt.Errorf("тут: %+v", data))
+		var d Data
+		err = rows.Scan(&d.Id, &d.Name)
+		if err != nil {
+			return nil, fmt.Errorf("unable to scan row: %v", err)
+		}
+		data = append(data, d)
+		fmt.Println(fmt.Errorf("тут: %+v", data))
 	}
-   
-   
 	return data, nil
-   }
+}
 
 func UpdateName(name string, id int) any {
 	pool := DbStart()

@@ -7,16 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type User struct {
-    Name string `json:"name"`
-}
-
 func InsertName(c *gin.Context) {
-	var user User
-	err := c.BindJSON(&user)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-	c.JSON(http.StatusOK, db.Insert(user.Name))
+	var user db.Data
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	
+	user, err := db.Insert(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
