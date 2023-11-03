@@ -70,7 +70,7 @@ func GetAllNames() ([]Data, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
-	defer pool.Close()
+	defer conn.Release()
 	rows, err := conn.Query(context.Background(),
 		"SELECT id, name FROM test")
 	if err != nil {
