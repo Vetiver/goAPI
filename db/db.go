@@ -31,7 +31,7 @@ func Insert(name Data) (Data, error) {
     if err != nil {
         return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
     }
-
+	defer conn.Release()
     err = conn.QueryRow(context.Background(),
         "INSERT INTO test(name) VALUES ($1) RETURNING id", name.Name).Scan(&name.Id)
     if err != nil {
@@ -41,7 +41,7 @@ func Insert(name Data) (Data, error) {
     return name, nil
 }
 
-func DeliteById(id int) error {
+func DeleteById(id int) error {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
@@ -96,7 +96,7 @@ func UpdateName(name Data) (Data, error) {
 	if err != nil {
 		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
-
+	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
 		"UPDATE test SET name = $1  WHERE id = $2 ", name.Name, name.Id)
 	//после коннекта прописываем запрос на DELETE и возвращаем id

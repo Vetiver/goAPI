@@ -15,7 +15,7 @@ func Del(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
 	}
-	err = db.DeliteById(intId)
+	err = db.DeleteById(intId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
