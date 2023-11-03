@@ -7,6 +7,7 @@ package main
 	"os/signal"
 	"syscall"
 	"time"
+	"goApi/db"
 	)
 import "github.com/gin-gonic/gin"
 
@@ -32,7 +33,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-
+		db.DbStart()
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)

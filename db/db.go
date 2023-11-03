@@ -13,6 +13,8 @@ type Data struct {
 	Id   int    `json:"id"`
 }
 
+var DB *pgxpool.Pool
+
 func DbStart() *pgxpool.Pool {
 	urlExample := "postgres://postgres:228@localhost:5432/postgres"
 	dbpool, err := pgxpool.New(context.Background(), urlExample)
@@ -20,14 +22,14 @@ func DbStart() *pgxpool.Pool {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v", err)
 		os.Exit(1)
 	}
-
-	return dbpool
+	DB = dbpool
+	return DB
 }
 
 func Insert(name Data) (Data, error) {
-    pool := DbStart()
 
-    conn, err := pool.Acquire(context.Background())
+
+    conn, err := DB.Acquire(context.Background())
     if err != nil {
         return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
     }
@@ -42,9 +44,8 @@ func Insert(name Data) (Data, error) {
 }
 
 func DeleteById(id int) error {
-	pool := DbStart()
 
-	conn, err := pool.Acquire(context.Background())
+	conn, err := DB.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -62,8 +63,7 @@ func DeleteById(id int) error {
 }
 
 func GetAllNames() ([]Data, error) {
-	pool := DbStart()
-	conn, err := pool.Acquire(context.Background())
+	conn, err := DB.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -89,9 +89,8 @@ func GetAllNames() ([]Data, error) {
 }
 
 func UpdateName(name Data) (Data, error) {
-	pool := DbStart()
 
-	conn, err := pool.Acquire(context.Background())
+	conn, err := DB.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
