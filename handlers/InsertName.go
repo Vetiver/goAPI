@@ -9,7 +9,8 @@ import (
 
 func InsertName(c *gin.Context) {
 	var user db.Data
-	if err := c.BindJSON(&user); err != nil {
+	if err := c.BindJSON(&user); 
+	err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

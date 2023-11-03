@@ -41,14 +41,13 @@ func Insert(name Data) (Data, error) {
     return name, nil
 }
 
-func DeliteById(id int) string {
+func DeliteById(id int) error {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "ошибка соединения"
+		return fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
@@ -56,11 +55,10 @@ func DeliteById(id int) string {
 	//после коннекта прописываем запрос на DELETE и возвращаем id
 	err = row.Scan(&id)
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to DELITE: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
-		return "неправильный запрос, карточки с таким id не существует"
+		return fmt.Errorf("unable to DELITE: %v", err)
 	}
-	return "успешное удаление"
+	return nil
 }
 
 func GetAllNames() ([]Data, error) {
@@ -90,14 +88,13 @@ func GetAllNames() ([]Data, error) {
 	return data, nil
 }
 
-func UpdateName(name Data) any {
+func UpdateName(name Data) (Data, error) {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "ошибка соединения"
+		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
 
 	row := conn.QueryRow(context.Background(),
@@ -107,9 +104,8 @@ func UpdateName(name Data) any {
 	row.Scan()
 	//сканируем значение id
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
-		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
+		return Data{}, fmt.Errorf("unable to UPDATE: %v", err)
 	}
-	return "успешный апдейт"
+	return name, nil
 }

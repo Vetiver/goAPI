@@ -14,6 +14,10 @@ func UpdateNameById(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-
-	c.JSON(http.StatusOK, db.UpdateName(user))
+	user, err = db.UpdateName(user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+	}
+	c.JSON(http.StatusOK, user)
 }
