@@ -50,7 +50,7 @@ func DeliteById(id int) string {
 		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
 		return "ошибка соединения"
 	}
-	defer pool.Close()
+	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
 		"DELETE FROM test WHERE id=$1 RETURNING id;", id)
 	//после коннекта прописываем запрос на DELETE и возвращаем id
@@ -90,7 +90,7 @@ func GetAllNames() ([]Data, error) {
 	return data, nil
 }
 
-func UpdateName(name string, id int) any {
+func UpdateName(name, id  Data) string {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())

@@ -7,8 +7,8 @@ import (
 )
 
 type UpdateData struct {
-	Name string `json:"name"`
-	Id   int    `json:"id"`
+	Name db.Data `json:"name"`
+	Id   db.Data    `json:"id"`
    }
 
 func UpdateNameById(c *gin.Context) {
@@ -19,5 +19,5 @@ func UpdateNameById(c *gin.Context) {
         return
     }
 
-	c.JSON(200, db.UpdateName(user.Name, user.Id))
+	c.JSON(http.StatusOK, db.UpdateName(user.Name, user.Id))
 }
