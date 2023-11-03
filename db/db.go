@@ -2,15 +2,15 @@ package db
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Record struct {
-	Id int `json:"id"`
+type Data struct {
+	Name string `json:"name"`
+	Id   int    `json:"id"`
 }
 
 func DbStart() *pgxpool.Pool {
@@ -24,78 +24,88 @@ func DbStart() *pgxpool.Pool {
 	return dbpool
 }
 
-func Insert() string {
-	pool := DbStart()
+func Insert(name Data) (Data, error) {
+    pool := DbStart()
 
-	conn, err := pool.Acquire(context.Background())
-	//Acqure - забирает одно соединение с бд из pool
-	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "не коннектится пупсик"
-	}
+    conn, err := pool.Acquire(context.Background())
+    if err != nil {
+        return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
+    }
+	defer conn.Release()
+    err = conn.QueryRow(context.Background(),
+        "INSERT INTO test(name) VALUES ($1) RETURNING id", name.Name).Scan(&name.Id)
+    if err != nil {
+        return Data{}, fmt.Errorf("unable to INSERT: %v", err)
+    }
 
-	row := conn.QueryRow(context.Background(),
-		"INSERT INTO test(name) VALUES ($1) RETURNING id;", "rrrr")
-	//после коннекта прописываем запрос на Insert и возвращаем значение id
-	var id uint64
-	//интициализируем переменную id
-	err = row.Scan(&id)
-	//сканируем значение id
-	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
-		//если ты тупой, то тебе вернет ошибку пупсик
-		return "тупорылая ты ослица, что ты пытался сделать?"
-	}
-	return "успешное добавление"
+    return name, nil
 }
 
-
-func DeliteById() string {
+func DeleteById(id int) error {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "ошибка соединения"
+		return fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
-
+	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
-		"DELETE FROM test WHERE id=$1 RETURNING id;", 1)
+		"DELETE FROM test WHERE id=$1 RETURNING id;", id)
 	//после коннекта прописываем запрос на DELETE и возвращаем id
-	var id uint64
-	//интициализируем переменную id
 	err = row.Scan(&id)
-	//сканируем значение id
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
-		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
+		return fmt.Errorf("unable to DELITE: %v", err)
 	}
-	return "успешное удаление"
+	return nil
 }
 
+func GetAllNames() ([]Data, error) {
+	pool := DbStart()
+	conn, err := pool.Acquire(context.Background())
+	//Acqure - забирает одно соединение с бд из pool
+	if err != nil {
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+	}
+	defer conn.Release()
+	rows, err := conn.Query(context.Background(),
+		"SELECT id, name FROM test")
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
+	}
+	defer rows.Close()
+	var data []Data
+	for rows.Next() {
+		var d Data
+		err = rows.Scan(&d.Id, &d.Name)
+		if err != nil {
+			return nil, fmt.Errorf("unable to scan row: %v", err)
+		}
+		data = append(data, d)
+		fmt.Println(fmt.Errorf("тут: %+v", data))
+	}
+	return data, nil
+}
 
-func GetAllNames() any {
+func UpdateName(name Data) (Data, error) {
 	pool := DbStart()
 
 	conn, err := pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to acquire a database connection: %v", err))
-		return "ошибка соединения"
+		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
-
+	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
-		"SELECT * FROM test")
-	//после коннекта прописываем запрос на получение инфы о всех таблицах
-	err = row.Scan(&row)
-	users, err := json.Marshal(err)
+		"UPDATE test SET name = $1  WHERE id = $2 ", name.Name, name.Id)
+	//после коннекта прописываем запрос на DELETE и возвращаем id
+	//интициализируем переменную id
+	row.Scan()
 	//сканируем значение id
 	if err != nil {
-		fmt.Println(fmt.Errorf("unable to INSERT: %v", err))
 		//если ты тупой, то тебе вернет ошибку пупсик
-		return "неправильный запрос придурок или ты пытаешься вогнать не тот тип данных(осел)"
+		return Data{}, fmt.Errorf("unable to UPDATE: %v", err)
 	}
-	return users
+	return name, nil
 }
