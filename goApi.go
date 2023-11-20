@@ -7,19 +7,26 @@ package main
 	"os/signal"
 	"syscall"
 	"time"
+	"goApi/db"
 	)
 import "github.com/gin-gonic/gin"
 
 import "goApi/handlers"
 
 func main() {
+	pool := db.DbStart()
+
+	db := db.NewDB(pool)
+
+	handler := handlers.NewBaseHandler(db)
+
 	r := gin.Default()
 	v1 := r.Group("/name")
 	{
-		v1.POST("/insert", handlers.InsertName)
-		v1.GET("/getNames", handlers.GetAll)
-		v1.DELETE("/delName/:id", handlers.Del)
-		v1.PATCH("/update", handlers.UpdateNameById)
+		v1.POST("/insert", handler.InsertName)
+		v1.GET("/getNames", handler.GetAll)
+		v1.DELETE("/delName/:id", handler.Del)
+		v1.PATCH("/update", handler.UpdateNameById)
 	}
 	srv := &http.Server{
 		Addr:    ":8080",

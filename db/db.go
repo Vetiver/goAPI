@@ -13,6 +13,19 @@ type Data struct {
 	Id   int    `json:"id"`
 }
 
+type DB struct {
+	pool *pgxpool.Pool
+}
+
+func NewDB(pool *pgxpool.Pool) *DB {
+	return &DB{
+		pool: pool,
+	}
+}
+
+
+
+
 func DbStart() *pgxpool.Pool {
 	urlExample := "postgres://postgres:228@localhost:5432/postgres"
 	dbpool, err := pgxpool.New(context.Background(), urlExample)
@@ -20,14 +33,13 @@ func DbStart() *pgxpool.Pool {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v", err)
 		os.Exit(1)
 	}
-
 	return dbpool
 }
 
-func Insert(name Data) (Data, error) {
-    pool := DbStart()
+func (db DB) Insert(name Data) (Data, error) {
 
-    conn, err := pool.Acquire(context.Background())
+
+    conn, err := db.pool.Acquire(context.Background())
     if err != nil {
         return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
     }
@@ -41,10 +53,9 @@ func Insert(name Data) (Data, error) {
     return name, nil
 }
 
-func DeleteById(id int) error {
-	pool := DbStart()
+func (db DB) DeleteById(id int) error {
 
-	conn, err := pool.Acquire(context.Background())
+	conn, err := db.pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -61,9 +72,8 @@ func DeleteById(id int) error {
 	return nil
 }
 
-func GetAllNames() ([]Data, error) {
-	pool := DbStart()
-	conn, err := pool.Acquire(context.Background())
+func (db DB) GetAllNames() ([]Data, error) {
+	conn, err := db.pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -88,10 +98,9 @@ func GetAllNames() ([]Data, error) {
 	return data, nil
 }
 
-func UpdateName(name Data) (Data, error) {
-	pool := DbStart()
+func (db DB) UpdateName(name Data) (Data, error) {
 
-	conn, err := pool.Acquire(context.Background())
+	conn, err := db.pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
 		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
