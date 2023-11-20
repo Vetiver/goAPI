@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InsertName(c *gin.Context) {
+func (h BaseHandler) InsertName(c *gin.Context) {
 	var user db.Data
 	if err := c.BindJSON(&user); 
 	err != nil {
@@ -15,7 +15,7 @@ func InsertName(c *gin.Context) {
 		return
 	}
 	
-	user, err := db.Insert(user)
+	user, err := h.db.Insert(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

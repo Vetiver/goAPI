@@ -7,14 +7,14 @@ import (
 )
 
 
-func UpdateNameById(c *gin.Context) {
+func (h BaseHandler) UpdateNameById(c *gin.Context) {
 	var user db.Data
 	err := c.BindJSON(&user)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-	user, err = db.UpdateName(user)
+	user, err = h.db.UpdateName(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return

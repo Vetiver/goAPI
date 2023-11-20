@@ -14,13 +14,19 @@ import "github.com/gin-gonic/gin"
 import "goApi/handlers"
 
 func main() {
+	pool := db.DbStart()
+
+	db := db.NewDB(pool)
+
+	handler := handlers.NewBaseHandler(db)
+
 	r := gin.Default()
 	v1 := r.Group("/name")
 	{
-		v1.POST("/insert", handlers.InsertName)
-		v1.GET("/getNames", handlers.GetAll)
-		v1.DELETE("/delName/:id", handlers.Del)
-		v1.PATCH("/update", handlers.UpdateNameById)
+		v1.POST("/insert", handler.InsertName)
+		v1.GET("/getNames", handler.GetAll)
+		v1.DELETE("/delName/:id", handler.Del)
+		v1.PATCH("/update", handler.UpdateNameById)
 	}
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -33,7 +39,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-		db.DbStart()
+
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)
