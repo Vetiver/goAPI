@@ -36,21 +36,21 @@ func DbStart() *pgxpool.Pool {
 	return dbpool
 }
 
-func (db DB) Insert(name Data) (Data, error) {
+func (db DB) Insert(name Data) (*Data, error) {
 
 
     conn, err := db.pool.Acquire(context.Background())
     if err != nil {
-        return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
+        return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
     }
 	defer conn.Release()
     err = conn.QueryRow(context.Background(),
         "INSERT INTO test(name) VALUES ($1) RETURNING id", name.Name).Scan(&name.Id)
     if err != nil {
-        return Data{}, fmt.Errorf("unable to INSERT: %v", err)
+        return nil, fmt.Errorf("unable to INSERT: %v", err)
     }
 
-    return name, nil
+    return &name, nil
 }
 
 func (db DB) DeleteById(id int) error {
@@ -98,12 +98,12 @@ func (db DB) GetAllNames() ([]Data, error) {
 	return data, nil
 }
 
-func (db DB) UpdateName(name Data) (Data, error) {
+func (db DB) UpdateName(name Data) (*Data, error) {
 
 	conn, err := db.pool.Acquire(context.Background())
 	//Acqure - забирает одно соединение с бд из pool
 	if err != nil {
-		return Data{}, fmt.Errorf("unable to acquire a database connection: %v", err)
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(),
@@ -114,7 +114,7 @@ func (db DB) UpdateName(name Data) (Data, error) {
 	//сканируем значение id
 	if err != nil {
 		//если ты тупой, то тебе вернет ошибку пупсик
-		return Data{}, fmt.Errorf("unable to UPDATE: %v", err)
+		return nil, fmt.Errorf("unable to UPDATE: %v", err)
 	}
-	return name, nil
+	return &name, nil
 }
